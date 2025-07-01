@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Icon Headshot Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #000000 50%, #1a1a1a 75%, #0f0f0f 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255,255,255,0.03) 0%, transparent 50%),
+                radial-gradient(circle at 60% 20%, rgba(255,255,255,0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 50px;
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent, rgba(255,255,255,0.1));
+            border-radius: 26px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 40px;
+            font-size: 3.2em;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ffffff, transparent);
+            opacity: 0.6;
+        }
+
+        .upload-section {
+            margin-bottom: 50px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+
+        #fileInput {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            color: #000000;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 32px rgba(255, 255, 255, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-btn:hover::before {
+            left: 100%;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 12px 40px rgba(255, 255, 255, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .size-presets {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preset-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .preset-btn:hover::before {
+            opacity: 1;
+        }
+
+        .preset-btn:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .preset-btn.active {
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            color: #000000;
+            border-color: #ffffff;
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+
+        .color-picker {
+            width: 70px;
+            height: 70px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.3),
+                inset 0 2px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .color-picker:hover {
+            transform: scale(1.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                0 12px 35px rgba(0, 0, 0, 0.4),
+                0 0 0 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .slider {
+            width: 180px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            position: relative;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            cursor: pointer;
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.3),
+                0 2px 0 rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.4),
+                0 0 0 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .dimension-inputs {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .dimension-input {
+            width: 90px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .dimension-input:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+
+        .icon-style-toggle {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .style-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .style-btn:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .style-btn.active {
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            color: #000000;
+            border-color: #ffffff;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .canvas-wrapper {
+            text-align: center;
+        }
+
+        .canvas-wrapper h3 {
+            margin-bottom: 15px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 16px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 
+                0 16px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 100%;
+            transition: all 0.3s;
+        }
+
+        canvas:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .download-section {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            color: #000000;
+            padding: 18px 35px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 32px rgba(255, 255, 255, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .download-btn:hover::before {
+            left: 100%;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 12px 40px rgba(255, 255, 255, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .download-btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .preset-colors {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .preset-color {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .preset-color:hover {
+            transform: scale(1.3);
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.4),
+                0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+
+        .info-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-top: 20px;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* Scroll animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container > * {
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .container > *:nth-child(2) { animation-delay: 0.1s; }
+        .container > *:nth-child(3) { animation-delay: 0.2s; }
+        .container > *:nth-child(4) { animation-delay: 0.3s; }
+        .container > *:nth-child(5) { animation-delay: 0.4s; }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .size-presets {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .canvas-container {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>App Icon Headshot Generator</h1>
+        
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <button class="upload-btn" id="uploadBtn">Choose Photo</button>
+            </div>
+            <p class="info-text">Upload your photo to create a professional app icon headshot</p>
+        </div>
+
+        <div class="size-presets">
+            <button class="preset-btn active" data-width="1024" data-height="1024">iPhone App Icon (1024×1024)</button>
+            <button class="preset-btn" data-width="512" data-height="512">Android App Icon (512×512)</button>
+            <button class="preset-btn" data-width="192" data-height="192">Android Launcher (192×192)</button>
+            <button class="preset-btn" data-width="180" data-height="180">iPhone Home Screen (180×180)</button>
+            <button class="preset-btn" data-width="500" data-height="500">Square Profile (500×500)</button>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Custom Dimensions</label>
+                <div class="dimension-inputs">
+                    <input type="number" id="widthInput" class="dimension-input" value="1024" min="50" max="2048">
+                    <span style="color: rgba(255,255,255,0.7); font-weight: 300;">×</span>
+                    <input type="number" id="heightInput" class="dimension-input" value="1024" min="50" max="2048">
+                    <span style="color: rgba(255,255,255,0.7); font-weight: 300;">px</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Icon Style</label>
+                <div class="icon-style-toggle">
+                    <button class="style-btn active" id="circleBtn">Circle</button>
+                    <button class="style-btn" id="roundedBtn">Rounded</button>
+                    <button class="style-btn" id="squareBtn">Square</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>Background Color</label>
+                <input type="color" id="bgColor" class="color-picker" value="#1976D2">
+                <div class="preset-colors">
+                    <div class="preset-color" style="background: #1976D2" data-color="#1976D2"></div>
+                    <div class="preset-color" style="background: #2E7D32" data-color="#2E7D32"></div>
+                    <div class="preset-color" style="background: #7B1FA2" data-color="#7B1FA2"></div>
+                    <div class="preset-color" style="background: #D32F2F" data-color="#D32F2F"></div>
+                    <div class="preset-color" style="background: #F57C00" data-color="#F57C00"></div>
+                    <div class="preset-color" style="background: #37474F" data-color="#37474F"></div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>Brightness</label>
+                <input type="range" id="brightness" class="slider" min="0.5" max="1.5" step="0.1" value="1">
+            </div>
+            
+            <div class="control-group">
+                <label>Contrast</label>
+                <input type="range" id="contrast" class="slider" min="0.5" max="2" step="0.1" value="1">
+            </div>
+            
+            <div class="control-group">
+                <label>Saturation</label>
+                <input type="range" id="saturation" class="slider" min="0" max="2" step="0.1" value="1">
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <div class="canvas-wrapper">
+                <h3>Original</h3>
+                <canvas id="originalCanvas" width="300" height="300"></canvas>
+            </div>
+            <div class="canvas-wrapper">
+                <h3>App Icon Preview</h3>
+                <canvas id="outputCanvas" width="300" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <button id="downloadBtn" class="download-btn" disabled>Download App Icon</button>
+            <button id="downloadAllBtn" class="download-btn" disabled>Download All Sizes</button>
+        </div>
+        
+        <p class="info-text">
+            Icons are optimized for app stores and home screen display.<br>
+            iPhone icons will automatically get rounded corners when installed.
+        </p>
+    </div>
+
+    <script>
+        fileInput.addEventListener('change', handleFileSelect);
+        const uploadBtn = document.getElementById('uploadBtn');
+        const bgColorInput = document.getElementById('bgColor');
+        const brightnessSlider = document.getElementById('brightness');
+        const contrastSlider = document.getElementById('contrast');
+        const saturationSlider = document.getElementById('saturation');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const outputCanvas = document.getElementById('outputCanvas');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const widthInput = document.getElementById('widthInput');
+        const heightInput = document.getElementById('heightInput');
+        const presetBtns = document.querySelectorAll('.preset-btn');
+        const presetColors = document.querySelectorAll('.preset-color');
+        const circleBtn = document.getElementById('circleBtn');
+        const roundedBtn = document.getElementById('roundedBtn');
+        const squareBtn = document.getElementById('squareBtn');
+
+        uploadBtn.addEventListener('click', () => { 
+            fileInput.click();
+
+        })
+        fileInput.addEventListener('change', handleFileSelect);  
+
+        let currentImage = null;
+        let currentStyle = 'circle';
+
+        // Add event listeners
+        fileInput.addEventListener('change', handleFileSelect);
+        bgColorInput.addEventListener('input', updateIcon);
+        brightnessSlider.addEventListener('input', updateIcon);
+        contrastSlider.addEventListener('input', updateIcon);
+        saturationSlider.addEventListener('input', updateIcon);
+        widthInput.addEventListener('input', updateIcon);
+        heightInput.addEventListener('input', updateIcon);
+        downloadBtn.addEventListener('click', downloadImage);
+        downloadAllBtn.addEventListener('click', downloadAllSizes);
+
+        // Style buttons
+        [circleBtn, roundedBtn, squareBtn].forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentStyle = btn.id.replace('Btn', '');
+                updateIcon();
+            });
+        });
+
+        // Preset size buttons
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                presetBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                widthInput.value = btn.dataset.width;
+                heightInput.value = btn.dataset.height;
+                updateIcon();
+            });
+        });
+
+        // Preset colors
+        presetColors.forEach(color => {
+            color.addEventListener('click', () => {
+                bgColorInput.value = color.dataset.color;
+                updateIcon();
+            });
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    currentImage = img;
+                    drawOriginal();
+                    updateIcon();
+                    downloadBtn.disabled = false;
+                    downloadAllBtn.disabled = false;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function drawOriginal() {
+            if (!currentImage) return;
+
+            const ctx = originalCanvas.getContext('2d');
+            const size = 300;
+            
+            ctx.clearRect(0, 0, size, size);
+            
+            const scale = Math.min(size / currentImage.width, size / currentImage.height);
+            const scaledWidth = currentImage.width * scale;
+            const scaledHeight = currentImage.height * scale;
+            const x = (size - scaledWidth) / 2;
+            const y = (size - scaledHeight) / 2;
+            
+            ctx.drawImage(currentImage, x, y, scaledWidth, scaledHeight);
+        }
+
+        function updateIcon() {
+            if (!currentImage) return;
+
+            const ctx = outputCanvas.getContext('2d');
+            const size = 300;
+            
+            ctx.clearRect(0, 0, size, size);
+            
+            // Apply shape clipping
+            ctx.save();
+            applyShapeClip(ctx, size);
+            ctx.clip();
+            
+            // Fill background
+            ctx.fillStyle = bgColorInput.value;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Calculate crop dimensions
+            const cropSize = Math.min(currentImage.width, currentImage.height);
+            const cropX = (currentImage.width - cropSize) / 2;
+            const cropY = Math.max(0, (currentImage.height - cropSize) / 2 - cropSize * 0.1);
+            
+            // Apply filters
+            const brightness = brightnessSlider.value;
+            const contrast = contrastSlider.value;
+            const saturation = saturationSlider.value;
+            
+            ctx.filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation})`;
+            
+            // Draw image
+            ctx.drawImage(
+                currentImage,
+                cropX, cropY, cropSize, cropSize,
+                0, 0, size, size
+            );
+            
+            ctx.restore();
+            
+            // Add border if needed
+            if (currentStyle !== 'square') {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                if (currentStyle === 'circle') {
+                    ctx.arc(size/2, size/2, size/2 - 1, 0, Math.PI * 2);
+                } else if (currentStyle === 'rounded') {
+                    roundedRect(ctx, 1, 1, size-2, size-2, size * 0.1);
+                }
+                ctx.stroke();
+            }
+        }
+
+        function applyShapeClip(ctx, size) {
+            ctx.beginPath();
+            if (currentStyle === 'circle') {
+                ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+            } else if (currentStyle === 'rounded') {
+                roundedRect(ctx, 0, 0, size, size, size * 0.1);
+            } else {
+                ctx.rect(0, 0, size, size);
+            }
+        }
+
+        function roundedRect(ctx, x, y, width, height, radius) {
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function downloadImage() {
+            if (!currentImage) return;
+
+            const tempCanvas = document.createElement('canvas');
+            const width = parseInt(widthInput.value);
+            const height = parseInt(heightInput.value);
+            
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            
+            const ctx = tempCanvas.getContext('2d');
+            
+            // Apply shape clipping
+            ctx.save();
+            applyShapeClip(ctx, Math.min(width, height));
+            ctx.clip();
+            
+            // Fill background
+            ctx.fillStyle = bgColorInput.value;
+            ctx.fillRect(0, 0, width, height);
+            
+            // Calculate crop dimensions
+            const cropSize = Math.min(currentImage.width, currentImage.height);
+            const cropX = (currentImage.width - cropSize) / 2;
+            const cropY = Math.max(0, (currentImage.height - cropSize) / 2 - cropSize * 0.1);
+            
+            // Apply filters
+            const brightness = brightnessSlider.value;
+            const contrast = contrastSlider.value;
+            const saturation = saturationSlider.value;
+            
+            ctx.filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation})`;
+            
+            // Draw image
+            ctx.drawImage(
+                currentImage,
+                cropX, cropY, cropSize, cropSize,
+                0, 0, width, height
+            );
+            
+            ctx.restore();
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = `app-icon-${width}x${height}.png`;
+            link.href = tempCanvas.toDataURL();
+            link.click();
+        }
+
+        function downloadAllSizes() {
+            if (!currentImage) return;
+
+            const sizes = [
+                { name: 'iPhone App Store', width: 1024, height: 1024 },
+                { name: 'Android Play Store', width: 512, height: 512 },
+                { name: 'iPhone Home Screen', width: 180, height: 180 },
+                { name: 'Android Launcher', width: 192, height: 192 },
+                { name: 'iPad Home Screen', width: 167, height: 167 },
+                { name: 'iPhone Spotlight', width: 120, height: 120 },
+                { name: 'Android Notification', width: 96, height: 96 },
+                { name: 'iPhone Settings', width: 87, height: 87 }
+            ];
+
+            sizes.forEach(size => {
+                setTimeout(() => {
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = size.width;
+                    tempCanvas.height = size.height;
+                    
+                    const ctx = tempCanvas.getContext('2d');
+                    
+                    // Apply shape clipping
+                    ctx.save();
+                    applyShapeClip(ctx, Math.min(size.width, size.height));
+                    ctx.clip();
+                    
+                    // Fill background
+                    ctx.fillStyle = bgColorInput.value;
+                    ctx.fillRect(0, 0, size.width, size.height);
+                    
+                    // Calculate crop dimensions
+                    const cropSize = Math.min(currentImage.width, currentImage.height);
+                    const cropX = (currentImage.width - cropSize) / 2;
+                    const cropY = Math.max(0, (currentImage.height - cropSize) / 2 - cropSize * 0.1);
+                    
+                    // Apply filters
+                    const brightness = brightnessSlider.value;
+                    const contrast = contrastSlider.value;
+                    const saturation = saturationSlider.value;
+                    
+                    ctx.filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation})`;
+                    
+                    // Draw image
+                    ctx.drawImage(
+                        currentImage,
+                        cropX, cropY, cropSize, cropSize,
+                        0, 0, size.width, size.height
+                    );
+                    
+                    ctx.restore();
+                    
+                    // Download
+                    const link = document.createElement('a');
+                    link.download = `${size.name.toLowerCase().replace(/\s+/g, '-')}-${size.width}x${size.height}.png`;
+                    link.href = tempCanvas.toDataURL();
+                    link.click();
+                }, 100);
+            });
+        }
+    </script>
+</body>
+</html>
