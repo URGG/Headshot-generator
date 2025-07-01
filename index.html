@@ -771,6 +771,25 @@
             }
         }
 
+            // Calculate crop dimensions for professional headshot
+            const aspectRatio = currentImage.width / currentImage.height;
+            let cropWidth, cropHeight, cropX, cropY;
+            
+            if (aspectRatio > 1) {
+                // Landscape - crop to center square, but favor upper portion for headshots
+                cropHeight = currentImage.height;
+                cropWidth = cropHeight;
+                cropX = (currentImage.width - cropWidth) / 2;
+                cropY = 0; // Start from top for better headshot framing
+            } else {
+                // Portrait - crop to show head and shoulders
+                cropWidth = currentImage.width;
+                cropHeight = cropWidth;
+                cropX = 0;
+                // Position crop to show head and upper torso (about 20% from top)
+                cropY = Math.max(0, Math.min(currentImage.height * 0.05, currentImage.height - cropHeight));
+            }
+
         function applyShapeClip(ctx, size) {
             ctx.beginPath();
             if (currentStyle === 'circle') {
